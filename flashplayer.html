@@ -4,23 +4,20 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>flashplayer</title>
-  <script src="./ruffle/ruffle.js"></script>
+  <script src="/ruffle/ruffle.js"></script>
 </head>
 <body>
   <div>
     <input id="file" type="file" accept=".swf">
     <button id="fs">Fullscreen</button>
-    <a href="./">Home</a>
+    <a href="/">Home</a>
     <span id="title">No game loaded</span>
   </div>
 
   <div id="stage" style="width:100vw; height:calc(100vh - 30px);"></div>
 
   <script>
-    const OWNER = "YOUR_GITHUB_USERNAME";
-    const REPO = "YOUR_REPO_NAME";
-    const BRANCH = "main";
-    const FOLDER = "assets/flash";
+    const FLASH_FOLDER = "/assets/flash/";
 
     window.RufflePlayer = window.RufflePlayer || {};
     window.RufflePlayer.config = {
@@ -41,10 +38,6 @@
     player.style.height = "100%";
     stage.appendChild(player);
 
-    function fileUrl(name) {
-      return `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${FOLDER}/${encodeURIComponent(name)}`;
-    }
-
     async function loadGame(url, name) {
       title.textContent = "Loading: " + name;
       await player.load({ url });
@@ -52,10 +45,15 @@
     }
 
     async function loadFromQuery() {
-      const params = new URLSearchParams(location.search);
+      const params = new URLSearchParams(window.location.search);
       const game = params.get("game");
-      if (!game) return;
-      await loadGame(fileUrl(game), game);
+
+      if (!game) {
+        title.textContent = "No game selected";
+        return;
+      }
+
+      await loadGame(FLASH_FOLDER + game, game);
     }
 
     document.getElementById("file").addEventListener("change", async (e) => {
