@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>flashplayer</title>
+  <script src="./ruffle/ruffle.js"></script>
+</head>
+<body>
+  <div>
+    <input id="file" type="file" accept=".swf">
+    <button id="fs">Fullscreen</button>
+    <a href="./">Home</a>
+    <span id="title">No game loaded</span>
+  </div>
+
+  <div id="stage" style="width:100vw; height:calc(100vh - 30px);"></div>
+
+  <script>
+    const OWNER = "YOUR_GITHUB_USERNAME";
+    const REPO = "YOUR_REPO_NAME";
+    const BRANCH = "main";
+    const FOLDER = "assets/flash";
+
+    window.RufflePlayer = window.RufflePlayer || {};
+    window.RufflePlayer.config = {
+      autoplay: "on",
+      unmuteOverlay: "visible",
+      scale: "showAll",
+      letterbox: "on",
+      backgroundColor: "#000000"
+    };
+
+    const stage = document.getElementById("stage");
+    const title = document.getElementById("title");
+
+    const ruffle = window.RufflePlayer.newest();
+    const player = ruffle.createPlayer();
+
+    player.style.width = "100%";
+    player.style.height = "100%";
+    stage.appendChild(player);
+
+    function fileUrl(name) {
+      return `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${FOLDER}/${encodeURIComponent(name)}`;
+    }
+
+    async function loadGame(url, name) {
+      title.textContent = "Loading: " + name;
+      await player.load({ url });
+      title.textContent = "Now playing: " + name;
+    }
+
+    async function loadFromQuery() {
+      const params = new URLSearchParams(location.search);
+      const game = params.get("game");
+      if (!game) return;
+      await loadGame(fileUrl(game), game);
+    }
+
+    document.getElementById("file").addEventListener("change", async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const url = URL.createObjectURL(file);
+      await loadGame(url, file.name);
+    });
+
+    document.getElementById("fs").addEventListener("click", async () => {
+      if (!document.fullscreenElement) {
+        await stage.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    });
+
+    loadFromQuery().catch(err => {
+      title.textContent = "Failed to load game";
+      console.error(err);
+    });
+  </script>
+</body>
+</html>
