@@ -1,12 +1,128 @@
-<h1>Greg's stuff</h1>
-<h2>html5 games</h2>
-<a href="/hl/" target=_blank>halflife</a><br>
-<a href="/slope/" target=_blank>slope</a><br>
-<h2>flash emulator</h2>
-<a>(placeholder)</a>
-<h2>webreto (arcade games!)</h2>
-<a>(placeholder)</a>
-<h2>the scramjet proxy (browse securely)</h2>
-<a>(placeholder)</a>
-<h2>wiki</h2>
-<a>(placeholder)</a>
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Greg's stuff</title>
+</head>
+<body>
+  <h1>Greg's stuff</h1>
+
+  <h2>html5 games</h2>
+  <a href="/hl/" target="_blank">halflife</a><br>
+  <a href="/slope/" target="_blank">slope</a><br>
+
+  <h2>flash emulator</h2>
+  <div id="flash-links"></div>
+
+  <h2>webreto (arcade games!)</h2>
+  <a href="" target="_blank">archive 1 (github)</a><br>
+
+  <h2>the scramjet proxy (browse securely)</h2>
+  <a>(placeholder)</a>
+
+  <h2>wiki</h2>
+  <a>(placeholder)</a>
+
+  <script>
+    // manually point to your folder
+    const FLASH_FOLDER = "/assets/flash/";
+
+    // list files here (no API needed)
+    const games = [
+      "bloxorz.swf",
+      "age-of-war.swf",
+      "duck-life-1.swf",
+      "interactive-buddy.swf",
+      "learn-2-fly.swf"
+    ];
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Greg's stuff</title>
+</head>
+<body>
+  <h1>Greg's stuff</h1>
+
+  <h2>html5 games</h2>
+  <a href="/hl/" target="_blank">halflife</a><br>
+  <a href="/slope/" target="_blank">slope</a><br>
+
+  <h2>flash emulator</h2>
+  <div id="flash-links">Loading...</div>
+
+  <h2>webreto (arcade games!)</h2>
+  <a href="" target="_blank">archive 1 (github)</a><br>
+
+  <h2>the scramjet proxy (browse securely)</h2>
+  <a>(placeholder)</a>
+
+  <h2>wiki</h2>
+  <a>(placeholder)</a>
+
+  <script>
+    const OWNER = "gregmccormick";
+    const REPO = "gregmccormick.github.io";
+    const BRANCH = "main";
+    const FOLDER = "assets/flash";
+
+    const flashLinks = document.getElementById("flash-links");
+
+    function nameFromFile(file) {
+      return file.replace(/\.swf$/i, "");
+    }
+
+    async function loadGames() {
+      const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${FOLDER}?ref=${BRANCH}`;
+
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("Failed to fetch game list");
+
+        const files = await res.json();
+
+        const swfs = files
+          .filter(file => file.type === "file" && file.name.toLowerCase().endsWith(".swf"))
+          .sort((a, b) => a.name.localeCompare(b.name));
+
+        flashLinks.innerHTML = "";
+
+        if (!swfs.length) {
+          flashLinks.textContent = "No .swf files found.";
+          return;
+        }
+
+        for (const file of swfs) {
+          const a = document.createElement("a");
+          a.href = `./flashplayer.html?game=${encodeURIComponent(file.name)}`;
+          a.target = "_blank";
+          a.textContent = nameFromFile(file.name);
+          flashLinks.appendChild(a);
+          flashLinks.appendChild(document.createElement("br"));
+        }
+      } catch (err) {
+        flashLinks.textContent = "Failed to load games.";
+        console.error(err);
+      }
+    }
+
+    loadGames();
+  </script>
+</body>
+</html>
+    const container = document.getElementById("flash-links");
+
+    for (const file of games) {
+      const a = document.createElement("a");
+      a.href = `/flashplayer.html?game=${encodeURIComponent(file)}`;
+      a.target = "_blank";
+      a.textContent = file;
+
+      container.appendChild(a);
+      container.appendChild(document.createElement("br"));
+    }
+  </script>
+</body>
+</html>
