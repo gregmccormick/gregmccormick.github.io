@@ -9,13 +9,14 @@
   <h1>Greg's stuff</h1>
 
   <h2>html5 games</h2>
-  <a href="/html5-games/hl/" target="_blank">halflife</a><br>
-  <a href="/html5-games/slope/" target="_blank">slope</a><br>
+  <a href="/hl/" target="_blank">halflife</a><br>
+  <a href="/slope/" target="_blank">slope</a><br>
 
   <h2>flash emulator</h2>
+  <input id="search" placeholder="search"><br>
   <div id="flash-links">Loading...</div>
 
-  <h2>webretro (arcade games!)</h2>
+  <h2>webreto (arcade games!)</h2>
   <a href="" target="_blank">archive 1 (github)</a><br>
 
   <h2>the scramjet proxy (browse securely)</h2>
@@ -31,9 +32,31 @@
     const FOLDER = "assets/flash";
 
     const flashLinks = document.getElementById("flash-links");
+    const search = document.getElementById("search");
+
+    let allGames = [];
 
     function nameFromFile(file) {
       return file.replace(/\.swf$/i, "");
+    }
+
+    function render(list) {
+      flashLinks.innerHTML = "";
+
+      if (!list.length) {
+        flashLinks.textContent = "No results";
+        return;
+      }
+
+      for (const file of list) {
+        const a = document.createElement("a");
+        a.href = `./flashplayer.html?game=${encodeURIComponent(file.name)}`;
+        a.target = "_blank";
+        a.textContent = nameFromFile(file.name);
+
+        flashLinks.appendChild(a);
+        flashLinks.appendChild(document.createElement("br"));
+      }
     }
 
     async function loadGames() {
@@ -41,35 +64,30 @@
 
       try {
         const res = await fetch(url);
-        if (!res.ok) throw new Error("Failed to fetch game list");
+        if (!res.ok) throw new Error("Failed");
 
         const files = await res.json();
 
-        const swfs = files
-          .filter(file => file.type === "file" && file.name.toLowerCase().endsWith(".swf"))
+        allGames = files
+          .filter(f => f.type === "file" && f.name.toLowerCase().endsWith(".swf"))
           .sort((a, b) => a.name.localeCompare(b.name));
 
-        flashLinks.innerHTML = "";
-
-        if (!swfs.length) {
-          flashLinks.textContent = "No .swf files found.";
-          return;
-        }
-
-        for (const file of swfs) {
-          const a = document.createElement("a");
-          a.href = `./flashplayer.html?game=${encodeURIComponent(file.name)}`;
-          a.target = "_blank";
-          a.textContent = nameFromFile(file.name);
-
-          flashLinks.appendChild(a);
-          flashLinks.appendChild(document.createElement("br"));
-        }
+        render(allGames);
       } catch (err) {
         flashLinks.textContent = "Failed to load games.";
         console.error(err);
       }
     }
+
+    search.addEventListener("input", () => {
+      const q = search.value.toLowerCase();
+
+      const filtered = allGames.filter(f =>
+        f.name.toLowerCase().includes(q)
+      );
+
+      render(filtered);
+    });
 
     loadGames();
   </script>
